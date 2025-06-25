@@ -40,22 +40,16 @@ Because this application uses browser features to save your progress, you must r
 1.  Open the `index.html` file in a code editor like VS Code.
 2.  Scroll down to the `<script>` section at the bottom.
 3.  Find the `filenames` list and replace the examples with the **exact filenames** of your videos. Make sure they are in the correct order.
+   Note:- Here i have put an Array.
 
     ```javascript
-    // ... inside the <script> tag
-    const filenames = [
-        "01_Your_First_Video.mp4",
-        "02_The_Next_Topic.mp4",
-        "03_Another_Lesson.mp4",
-        // ...add all your video filenames here
-    ];
-    // ...
+    // ...const filenames = Array.from({ length: 40 }, (_, i) => `5_62555417454638560${70 + i}.mp4`);
     ```
 
 ### Step 3: Run the Project
 
 1.  In VS Code, with your project folder open, install the **"Live Server"** extension from the Extensions marketplace.
-2.  Open the `index.html` file.
+2.  Open the `.html` file.
 3.  Click the **"Go Live"** button in the bottom-right corner of the window.
 
 Your browser will open with the correct address, and the tracker will now be perfectly configured for your course!
