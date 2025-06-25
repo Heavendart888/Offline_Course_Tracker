@@ -1,6 +1,8 @@
 # Offline_Course_Tracker
 Tracking your downloaded courses Offline like Udemy,Coursera.
 
+![Screenshot 2025-06-25 225534](https://github.com/user-attachments/assets/e7d18780-86f1-466d-aa2b-fc7053f66b3a)
+
 A self-contained, single-page web application designed to help you track your progress through any local video course. This tool remembers where you left off, tracks which videos you've completed, and provides a smooth, modern interface for your learning journey.
 
 ## ✨ Features
