@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>C++ Course Tracker | Final Version</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-light: #f4f7fa;
+            --bg-dark: #121828;
+            --text-light: #2c3e50;
+            --text-dark: #e0e5f5;
+            --primary: #00aaff;
+            --primary-dark: #0088cc;
+            --success: #28a745;
+            --success-dark: #218838;
+            --card-bg-light: rgba(255, 255, 255, 0.9);
+            --card-bg-dark: rgba(28, 41, 64, 0.85);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --border-dark: rgba(255, 255, 255, 0.15);
+            --shadow-light: rgba(44, 62, 80, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.2);
+            --highlight-bg-dark: rgba(0, 170, 255, 0.1);
+            --highlight-bg-light: rgba(0, 170, 255, 0.15);
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 18px;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            margin: 0;
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            padding: var(--spacing-lg);
+            box-sizing: border-box;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        body.light { background: var(--bg-light); color: var(--text-light); }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            margin: auto;
+            padding: var(--spacing-xl);
+            flex-grow: 1;
+            background: var(--card-bg-dark);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 15px -2px var(--shadow-dark);
+            border: 1px solid var(--border-dark);
+            transition: background 0.4s ease, box-shadow 0.4s ease, border 0.4s ease;
+            box-sizing: border-box;
+        }
+
+        body.light .container {
+            background: var(--card-bg-light);
+            box-shadow: 0 4px 15px -2px var(--shadow-light);
+            border: 1px solid var(--border-light);
+        }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes playing-glow { from { border-left-color: var(--primary); } to { border-left-color: var(--primary-dark); } }
+
+        .site-header { text-align: center; margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--border-dark); animation: popIn 0.5s ease-out forwards; }
+        body.light .site-header { border-color: var(--border-light); }
+        .main-title { font-family: var(--font-heading); font-size: 2.5em; margin: 0; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
+        .subtitle { font-size: 1.1em; opacity: 0.8; margin-top: 4px; }
+        
+        #progress-bar {
+            width: 100%;
+            background-color: rgba(0,0,0,0.25);
+            border-radius: 30px;
+            margin-top: var(--spacing-md);
+            overflow: hidden;
+            height: 22px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+        }
+        body.light #progress-bar { background-color: rgba(0,0,0,0.1); }
+        #progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), #22c249);
+            width: 0%;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8em;
+            line-height: 22px;
+            border-radius: 30px;
+            transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-align: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        #progress.complete { background: linear-gradient(90deg, var(--primary), #00c6ff); }
+
+        .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); flex-wrap: wrap; gap: var(--spacing-md); }
+        .search-container { position: relative; flex-grow: 1; max-width: 400px; }
+        #searchInput { width: 100%; padding: 12px 18px 12px 45px; border-radius: 25px; border: 1px solid transparent; background-color: rgba(0, 0, 0, 0.15); color: var(--text-dark); font-size: 1em; transition: all 0.3s ease; outline: none; }
+        body.light #searchInput { background-color: rgba(0, 0, 0, 0.05); color: var(--text-light); }
+        #searchInput:focus { border-color: var(--primary); background-color: transparent; box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3); }
+        .search-container .fa-search { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); opacity: 0.6; pointer-events: none; transition: opacity 0.3s ease; }
+        #searchInput:focus + .fa-search { opacity: 0; }
+
+        .switch { position: relative; display: inline-block; width: 60px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3e5066; transition: .4s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(30px); }
+
+        .main-content-flex { display: flex; gap: var(--spacing-xl); align-items: flex-start; }
+        .table-column { flex: 3; min-width: 0; }
+        .video-column { flex: 2; min-width: 0; position: sticky; top: var(--spacing-lg); }
+
+        .table-wrapper { max-height: 70vh; overflow-y: auto; border-radius: var(--border-radius-md); border: 1px solid var(--border-dark); }
+        body.light .table-wrapper { border-color: var(--border-light); }
+        .table-wrapper::-webkit-scrollbar { width: 8px; }
+        .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        body.light .table-wrapper::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border-dark); }
+        body.light th, body.light td { border-color: var(--border-light); }
+        th { background-color: rgba(0,0,0,0.15); font-weight: 600; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; }
+        .filename-cell { position: relative; }
+        
+        tbody tr { transition: background-color 0.3s ease; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: var(--highlight-bg-dark); }
+        body.light tbody tr:hover { background-color: var(--highlight-bg-light); }
+        
+        tr.playing { background-color: var(--highlight-bg-dark) !important; border-left: 4px solid var(--primary); animation: playing-glow 1s alternate infinite ease-in-out; }
+        body.light tr.playing { background-color: var(--highlight-bg-light) !important; }
+        tr.completed-video { opacity: 0.6 !important; }
+        tr.completed-video .filename-cell { text-decoration: line-through; }
+        
+        .resume-indicator::after {
+            content: 'Resume';
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-dark);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.65em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        tr.playing .resume-indicator::after { display: none; }
+
+        .play-btn { all: unset; box-sizing: border-box; padding: 8px 16px; background: var(--success); color: white; border-radius: 8px; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: background-color 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .play-btn:hover { background-color: var(--success-dark); }
+        .play-btn .fa-play, .play-btn .fa-pause { font-size: 0.9em; }
+        .play-btn .fa-pause { display: none; }
+        tr.playing .play-btn .fa-play { display: none; }
+        tr.playing .play-btn .fa-pause { display: inline-block; }
+
+        #videoPlayerContainer { width: 100%; aspect-ratio: 16 / 9; position: relative; border-radius: var(--border-radius-md); box-shadow: 0 8px 25px -5px var(--shadow-dark); background-color: #000; overflow: hidden; animation: popIn 0.5s ease-out; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark); }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: var(--border-radius-md); }
+        #videoPlayerContainer.empty::before { font-family: "Font Awesome 6 Free"; content: '\f144'; font-weight: 900; font-size: 5em; color: rgba(255,255,255,0.2); }
+        
+        .watched-checkbox { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border: 2px solid var(--primary); border-radius: 6px; cursor: pointer; position: relative; transition: all 0.2s ease-out; vertical-align: middle; background-color: transparent; }
+        .watched-checkbox:checked { background-color: var(--success); border-color: var(--success); }
+        .watched-checkbox:checked::after { content: '✔'; color: white; font-size: 14px; line-height: 1; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        @media (max-width: 1200px) { .main-content-flex { flex-direction: column; gap: var(--spacing-xl); } .video-column { width: 100%; position: static; } .table-wrapper { max-height: 50vh; } }
+        @media (max-width: 768px) { body { padding: var(--spacing-md); } .container { padding: var(--spacing-lg); } .main-title { font-size: 2em; } .header-controls { flex-direction: column; align-items: stretch; } }
+    </style>
+</head>
+<body class="dark">
+    <div class="container">
+        <header class="site-header">
+            <div class="title-container">
+                <h1 class="main-title">C++ Course Tracker</h1>
+                <p class="subtitle">Your Journey to Mastery</p>
+            </div>
+            <div id="progress-bar"><div id="progress"></div></div>
+        </header>
+
+        <div class="header-controls">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search topics...">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="darkToggle"><span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <main class="main-content-flex">
+            <div class="table-column">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>#</th><th>Topic</th><th>Action</th><th><i class="fas fa-check-circle" title="Watched"></i></th></tr>
+                        </thead>
+                        <tbody id="videoTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="video-column">
+                <div id="videoPlayerContainer" class="empty">
+                    <video id="videoPlayer" controls controlsList="nodownload"></video>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const videoTableBody = document.getElementById('videoTable');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoPlayerContainer = document.getElementById('videoPlayerContainer');
+        const progressBar = document.getElementById('progress');
+        const searchInput = document.getElementById('searchInput');
+        const darkToggle = document.getElementById('darkToggle');
+        const body = document.body;
+        const tableWrapper = document.querySelector('.table-wrapper');
+
+        const filenames = Array.from({ length: 40 }, (_, i) => `5_62555417454638560${70 + i}.mp4`);
+        let currentPlayingRow = null;
+        
+        const LAST_PLAYED_KEY = 'cpp-course-last-played';
+        const SCROLL_POS_KEY = 'cpp-course-scroll-position';
+
+        const throttle = (func, limit) => {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        };
+
+        const updateProgressBar = () => {
+            const watchedCount = document.querySelectorAll('.watched-checkbox:checked').length;
+            const totalVideos = filenames.length;
+            const percentage = totalVideos > 0 ? Math.round((watchedCount / totalVideos) * 100) : 0;
+            
+            const progressFill = document.getElementById('progress');
+            progressFill.style.width = percentage + '%';
+            
+            const progressText = `${percentage}%`;
+            if (percentage === 100) {
+                 progressFill.textContent = 'Course Complete! 🎉';
+            } else {
+                 progressFill.textContent = progressText;
+            }
+            progressFill.classList.toggle('complete', percentage === 100);
+        };
+        
+        const setupVideo = (row) => {
+            if (!row) return;
+
+            const previousIndicatorCell = document.querySelector('.resume-indicator');
+            if (previousIndicatorCell) {
+                previousIndicatorCell.classList.remove('resume-indicator');
+            }
+            const filenameCell = row.querySelector('.filename-cell');
+            if(filenameCell) {
+                filenameCell.classList.add('resume-indicator');
+            }
+            
+            if (currentPlayingRow && currentPlayingRow !== row) {
+                currentPlayingRow.classList.remove('playing');
+            }
+
+            currentPlayingRow = row;
+            videoPlayerContainer.classList.remove('empty');
+            
+            const filename = row.dataset.filename;
+            const posKey = `pos-${filename}`;
+            const lastTime = parseFloat(localStorage.getItem(posKey)) || 0;
+            
+            localStorage.setItem(LAST_PLAYED_KEY, filename);
+            videoPlayer.src = filename;
+
+            videoPlayer.oncanplay = () => {
+                 if (lastTime > 0) {
+                    videoPlayer.currentTime = lastTime;
+                }
+                videoPlayer.oncanplay = null;
+            };
+            videoPlayer.load();
+        };
+
+        const playNext = () => {
+            if (!currentPlayingRow) return;
+            const currentIndex = parseInt(currentPlayingRow.dataset.index, 10);
+            const nextIndex = currentIndex + 1;
+            if (nextIndex < filenames.length) {
+                const nextRow = document.querySelector(`tr[data-index='${nextIndex}']:not(.hidden-by-search)`);
+                if(nextRow) {
+                    setupVideo(nextRow);
+                    videoPlayer.play();
+                    nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                videoPlayerContainer.classList.add('empty');
+                if (currentPlayingRow) currentPlayingRow.classList.remove('playing');
+                currentPlayingRow = null;
+                alert("Congratulations! You've finished the course!");
+            }
+        };
+        
+        videoTableBody.addEventListener('click', (e) => {
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            if (e.target.closest('.play-btn')) {
+                if (row !== currentPlayingRow) {
+                    setupVideo(row);
+                }
+                videoPlayer.play();
+            }
+        });
+
+        videoTableBody.addEventListener('change', (e) => {
+            if (e.target.classList.contains('watched-checkbox')) {
+                const row = e.target.closest('tr');
+                row.classList.toggle('completed-video', e.target.checked);
+                localStorage.setItem(e.target.id, e.target.checked);
+                updateProgressBar();
+            }
+        });
+        
+        videoPlayer.addEventListener('timeupdate', throttle(() => {
+            if (currentPlayingRow && videoPlayer.currentTime > 0 && !videoPlayer.ended) {
+                localStorage.setItem(`pos-${currentPlayingRow.dataset.filename}`, videoPlayer.currentTime);
+            }
+        }, 1000));
+
+        videoPlayer.addEventListener('ended', () => {
+            if (!currentPlayingRow) return;
+
+            const filename = currentPlayingRow.dataset.filename;
+            localStorage.removeItem(`pos-${filename}`);
+
+            const checkbox = currentPlayingRow.querySelector('.watched-checkbox');
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            playNext();
+        });
+        
+        videoPlayer.addEventListener('play', () => currentPlayingRow?.classList.add('playing'));
+        videoPlayer.addEventListener('pause', () => currentPlayingRow?.classList.remove('playing'));
+        
+        tableWrapper.addEventListener('scroll', throttle(() => {
+            localStorage.setItem(SCROLL_POS_KEY, tableWrapper.scrollTop);
+        }, 500));
+
+        const initialize = () => {
+            const preferredTheme = localStorage.getItem('themePreference') || 'dark';
+            darkToggle.checked = preferredTheme === 'dark';
+            body.className = preferredTheme;
+            darkToggle.addEventListener('change', () => {
+                const newTheme = darkToggle.checked ? 'dark' : 'light';
+                body.className = newTheme;
+                localStorage.setItem('themePreference', newTheme);
+            });
+
+            const fragment = document.createDocumentFragment();
+            filenames.forEach((filename, index) => {
+                const id = `vid-${index}`;
+                const isChecked = localStorage.getItem(id) === 'true';
+                const row = document.createElement('tr');
+                row.dataset.filename = filename;
+                row.dataset.index = index;
+                if (isChecked) row.classList.add('completed-video');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td class="filename-cell">${filename.replace('.mp4', '').replace(/_/g, ' ')}</td>
+                    <td><button class="play-btn"><i class="fas fa-play"></i><i class="fas fa-pause"></i></button></td>
+                    <td><input type="checkbox" class="watched-checkbox" id="${id}" ${isChecked ? 'checked' : ''}></td>
+                `;
+                fragment.appendChild(row);
+            });
+            videoTableBody.appendChild(fragment);
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                videoTableBody.querySelectorAll('tr').forEach(row => {
+                    const topicCell = row.querySelector('.filename-cell');
+                    if (!topicCell) return;
+                    const topicText = topicCell.textContent.toLowerCase();
+                    const isVisible = topicText.includes(query);
+                    row.style.display = isVisible ? '' : 'none';
+                    row.classList.toggle('hidden-by-search', !isVisible);
+                });
+            });
+
+            updateProgressBar();
+            loadLastSession();
+            loadScrollPosition();
+        };
+
+        const loadLastSession = () => {
+            const lastPlayedFile = localStorage.getItem(LAST_PLAYED_KEY);
+            if(lastPlayedFile) {
+                const lastRow = document.querySelector(`tr[data-filename="${lastPlayedFile}"]`);
+                if(lastRow) {
+                    setupVideo(lastRow);
+                }
+            }
+        };
+
+        const loadScrollPosition = () => {
+            const savedScroll = localStorage.getItem(SCROLL_POS_KEY);
+            if (savedScroll) {
+                tableWrapper.scrollTop = parseInt(savedScroll, 10);
+            }
+        };
+
+        initialize();
+    });
+    </script>
+</body>
+</html>
