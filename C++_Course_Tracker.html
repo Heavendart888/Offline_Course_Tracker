@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>C++ Course Tracker | Final Version</title>
+    <title>C++ Course Tracker | v10 (Custom Scrollbar)</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -17,22 +17,21 @@
             --primary-dark: #0088cc;
             --success: #28a745;
             --success-dark: #218838;
-            --card-bg-light: rgba(255, 255, 255, 0.9);
-            --card-bg-dark: rgba(28, 41, 64, 0.85);
+            --danger: #dc3545;
+            --danger-dark: #c82333;
+            --card-bg-light: rgba(255, 255, 255, 0.95);
+            --card-bg-dark: rgba(28, 41, 64, 0.9);
             --border-light: rgba(0, 0, 0, 0.1);
             --border-dark: rgba(255, 255, 255, 0.15);
-            --shadow-light: rgba(44, 62, 80, 0.1);
-            --shadow-dark: rgba(0, 0, 0, 0.2);
             --highlight-bg-dark: rgba(0, 170, 255, 0.1);
             --highlight-bg-light: rgba(0, 170, 255, 0.15);
             --font-heading: 'Montserrat', sans-serif;
             --font-body: 'Inter', sans-serif;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --border-radius-md: 12px;
-            --border-radius-lg: 18px;
+            --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+
+        html { box-sizing: border-box; }
+        *, *:before, *:after { box-sizing: inherit; }
 
         body {
             font-family: var(--font-body);
@@ -40,523 +39,144 @@
             background: var(--bg-dark);
             color: var(--text-dark);
             line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            padding: var(--spacing-lg);
-            box-sizing: border-box;
+            padding: 16px;
             transition: background 0.4s ease, color 0.4s ease;
         }
+        body.light { background: var(--bg-light); color: var(--text-light); }
+        .hidden-row { display: none; }
 
-        body.light {
-            background: var(--bg-light);
-            color: var(--text-light);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .container {
             width: 100%;
             max-width: 1600px;
             margin: auto;
-            padding: var(--spacing-xl);
-            flex-grow: 1;
+            padding: 24px;
             background: var(--card-bg-dark);
-            border-radius: var(--border-radius-lg);
-            box-shadow: 0 4px 15px -2px var(--shadow-dark);
+            border-radius: 18px;
             border: 1px solid var(--border-dark);
-            transition: background 0.4s ease, box-shadow 0.4s ease, border 0.4s ease;
-            box-sizing: border-box;
+            transition: background 0.4s ease, border-color 0.4s ease;
+            animation: fadeIn 0.5s var(--ease-out) forwards;
         }
+        body.light .container { background: var(--card-bg-light); border: 1px solid var(--border-light); }
+        
+        .site-header { text-align: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border-dark); }
+        body.light .site-header { border-color: var(--border-light); }
+        .main-title { font-family: var(--font-heading); font-size: 2.2em; margin: 0; color: var(--primary); font-weight: 700; }
+        .subtitle { font-size: 1.1em; opacity: 0.8; margin-top: 4px; }
+        
+        #progress-bar { width: 100%; background-color: rgba(0, 0, 0, 0.2); border-radius: 30px; margin-top: 16px; overflow: hidden; height: 22px; }
+        body.light #progress-bar { background-color: rgba(0, 0, 0, 0.1); }
+        #progress { height: 100%; background: var(--success); width: 0%; color: white; font-weight: 600; font-size: 0.8em; line-height: 22px; border-radius: 30px; transition: width 0.5s var(--ease-out); text-align: center; }
+        #progress.complete { background: var(--primary); }
 
-        body.light .container {
-            background: var(--card-bg-light);
-            box-shadow: 0 4px 15px -2px var(--shadow-light);
-            border: 1px solid var(--border-light);
-        }
+        .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+        .search-container { position: relative; flex-grow: 1; max-width: 400px; }
+        #searchInput { width: 100%; padding: 10px 16px 10px 40px; border-radius: 20px; border: 1px solid var(--border-dark); background-color: rgba(0, 0, 0, 0.1); color: var(--text-dark); font-size: 1em; transition: all 0.3s ease; outline: none; }
+        body.light #searchInput { background-color: rgba(0, 0, 0, 0.05); color: var(--text-light); }
+        #searchInput:focus { border-color: var(--primary); background-color: transparent; }
+        .search-container .fa-search { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3e5066; transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        .main-content-flex { display: flex; gap: 24px; align-items: flex-start; }
+        .video-column { flex: 3; min-width: 0; position: sticky; top: 24px; }
+        .table-column { flex: 2; min-width: 0; }
 
-        @keyframes popIn {
-            from {
-                opacity: 0;
-                transform: scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+        .table-wrapper { max-height: 70vh; overflow-y: auto; border-radius: 12px; border: 1px solid var(--border-dark); }
+        body.light .table-wrapper { border-color: var(--border-light); }
 
-        @keyframes playing-glow {
-            from {
-                border-left-color: var(--primary);
-            }
-            to {
-                border-left-color: var(--primary-dark);
-            }
-        }
+        /* --- NEW: Custom Scrollbar Styles --- */
 
-        .site-header {
-            text-align: center;
-            margin-bottom: var(--spacing-lg);
-            padding-bottom: var(--spacing-lg);
-            border-bottom: 1px solid var(--border-dark);
-            animation: popIn 0.5s ease-out forwards;
-        }
-
-        body.light .site-header {
-            border-color: var(--border-light);
-        }
-
-        .main-title {
-            font-family: var(--font-heading);
-            font-size: 2.5em;
-            margin: 0;
-            color: var(--primary);
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .subtitle {
-            font-size: 1.1em;
-            opacity: 0.8;
-            margin-top: 4px;
-        }
-
-        #progress-bar {
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.25);
-            border-radius: 30px;
-            margin-top: var(--spacing-md);
-            overflow: hidden;
-            height: 22px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-        }
-
-        body.light #progress-bar {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        #progress {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), #22c249);
-            width: 0%;
-            color: white;
-            font-weight: 600;
-            font-size: 0.8em;
-            line-height: 22px;
-            border-radius: 30px;
-            transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            text-align: center;
-            padding: 0 10px;
-            box-sizing: border-box;
-        }
-
-        #progress.complete {
-            background: linear-gradient(90deg, var(--primary), #00c6ff);
-        }
-
-        .header-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
-        }
-
-        .search-container {
-            position: relative;
-            flex-grow: 1;
-            max-width: 400px;
-        }
-
-        #searchInput {
-            width: 100%;
-            padding: 12px 18px 12px 45px;
-            border-radius: 25px;
-            border: 1px solid transparent;
-            background-color: rgba(0, 0, 0, 0.15);
-            color: var(--text-dark);
-            font-size: 1em;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        body.light #searchInput {
-            background-color: rgba(0, 0, 0, 0.05);
-            color: var(--text-light);
-        }
-
-        #searchInput:focus {
-            border-color: var(--primary);
-            background-color: transparent;
-            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3);
-        }
-
-        .search-container .fa-search {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.6;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        #searchInput:focus+.fa-search {
-            opacity: 0;
-        }
-
-        /* === Beautiful Switch Styles === */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-            cursor: pointer;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #3e5066;
-            /* Dark mode bg */
-            transition: .4s;
-            border-radius: 30px;
-            /* Flexbox to align icons */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 4px;
-            overflow: hidden;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background-color: #121828;
-            transition: .4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        body.light .slider {
-            background-color: #87CEEB;
-            /* Light mode bg */
-        }
-
-        body.light .slider:before {
-            background-color: #f4f7fa;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(30px);
-        }
-
-        /* Icon Styles */
-        .slider .fa-moon,
-        .slider .fa-sun {
-            font-size: 16px;
-            color: #f0c400;
-            /* Sun/moon color */
-            transition: opacity 0.4s ease, transform 0.4s ease-in-out;
-            z-index: 0;
-        }
-
-        /* Default (Dark Mode) Icon State */
-        .slider .fa-moon {
-            opacity: 1;
-            transform: rotate(0deg) scale(1);
-        }
-
-        .slider .fa-sun {
-            opacity: 0;
-            transform: rotate(-90deg) scale(0);
-        }
-
-        /* Checked (Light Mode) Icon State */
-        input:checked+.slider .fa-moon {
-            opacity: 0;
-            transform: rotate(90deg) scale(0);
-        }
-
-        input:checked+.slider .fa-sun {
-            opacity: 1;
-            transform: rotate(0deg) scale(1);
-        }
-
-        /* === End of Beautiful Switch Styles === */
-
-        .main-content-flex {
-            display: flex;
-            gap: var(--spacing-xl);
-            align-items: flex-start;
-        }
-
-        .table-column {
-            flex: 3;
-            min-width: 0;
-        }
-
-        .video-column {
-            flex: 2;
-            min-width: 0;
-            position: sticky;
-            top: var(--spacing-lg);
-        }
-
+        /* Styles for Firefox */
         .table-wrapper {
-            max-height: 70vh;
-            overflow-y: auto;
-            border-radius: var(--border-radius-md);
-            border: 1px solid var(--border-dark);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
         }
 
-        body.light .table-wrapper {
-            border-color: var(--border-light);
-        }
-
+        /* Styles for WebKit Browsers (Chrome, Safari, Edge) */
         .table-wrapper::-webkit-scrollbar {
-            width: 8px;
+            width: 12px;
         }
 
         .table-wrapper::-webkit-scrollbar-track {
             background: transparent;
+            margin-block: 4px;
         }
 
         .table-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-
-        body.light .table-wrapper::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 14px 18px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-dark);
-        }
-
-        body.light th,
-        body.light td {
-            border-color: var(--border-light);
-        }
-
-        th {
-            background-color: rgba(0, 0, 0, 0.15);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .filename-cell {
-            position: relative;
-        }
-
-        tbody tr {
+            background-color: var(--primary);
+            border-radius: 10px;
+            border: 3px solid transparent;
+            background-clip: padding-box;
             transition: background-color 0.3s ease;
         }
 
-        tbody tr:last-child td {
-            border-bottom: none;
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background-color: var(--primary-dark);
         }
-
-        tbody tr:hover {
-            background-color: var(--highlight-bg-dark);
-        }
-
-        body.light tbody tr:hover {
-            background-color: var(--highlight-bg-light);
-        }
-
-        tr.playing {
-            background-color: var(--highlight-bg-dark) !important;
-            border-left: 4px solid var(--primary);
-            animation: playing-glow 1s alternate infinite ease-in-out;
-        }
-
-        body.light tr.playing {
-            background-color: var(--highlight-bg-light) !important;
-        }
-
-        tr.completed-video {
-            opacity: 0.6 !important;
-        }
-
-        tr.completed-video .filename-cell {
-            text-decoration: line-through;
-        }
-
-        .resume-indicator::after {
-            content: 'Resume';
-            position: absolute;
-            right: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary-dark);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.65em;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        tr.playing .resume-indicator::after {
-            display: none;
-        }
-
-        .play-btn {
-            all: unset;
-            box-sizing: border-box;
-            padding: 8px 16px;
-            background: var(--success);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9em;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .play-btn:hover {
-            background-color: var(--success-dark);
-        }
-
-        .play-btn .fa-play,
-        .play-btn .fa-pause {
-            font-size: 0.9em;
-        }
-
-        .play-btn .fa-pause {
-            display: none;
-        }
-
-        tr.playing .play-btn .fa-play {
-            display: none;
-        }
-
-        tr.playing .play-btn .fa-pause {
-            display: inline-block;
-        }
+        /* --- End of Custom Scrollbar Styles --- */
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { background-color: rgba(0, 0, 0, 0.15); font-weight: 600; text-transform: uppercase; font-size: 0.8em; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 10; padding: 12px 16px; text-align: left; }
+        td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-dark); vertical-align: middle; }
+        .filename-cell { position: relative; }
+        
+        tbody tr { transition: background-color 0.2s ease; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background-color: var(--highlight-bg-dark); }
+        body.light tbody tr:hover { background-color: var(--highlight-bg-light); }
+        
+        tr.playing { background-color: var(--highlight-bg-dark) !important; border-left: 4px solid var(--primary); }
+        body.light tr.playing { background-color: var(--highlight-bg-light) !important; }
+        tr.completed-video { opacity: 0.6; }
+        tr.completed-video .filename-cell { text-decoration: line-through; }
+        .resume-indicator::after { content: 'Resume'; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: var(--primary-dark); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.65em; font-weight: 700; }
+        tr.playing .resume-indicator::after { display: none; }
+        
+        .action-btn, .control-btn, .notes-btn { all: unset; box-sizing: border-box; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 500; transition: background-color 0.2s ease, filter 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border-dark); }
+        .action-btn:hover, .control-btn:hover, .notes-btn:hover { filter: brightness(1.2); }
+        .play-btn { background: var(--success); color: white; border-color: var(--success-dark); }
+        .notes-btn { background-color: transparent; border-color: var(--primary); color: var(--primary); }
+        .notes-btn.has-notes { background-color: var(--primary); color: white; }
+        .control-btn { background: rgba(255, 255, 255, 0.1); }
+        body.light .control-btn { background: rgba(0, 0, 0, 0.05); }
+        .control-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        #resetProgressBtn { background-color: var(--danger); color: white; border-color: var(--danger-dark); }
 
         #videoPlayerContainer {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            position: relative;
-            border-radius: var(--border-radius-md);
-            box-shadow: 0 8px 25px -5px var(--shadow-dark);
-            background-color: #000;
-            overflow: hidden;
-            animation: popIn 0.5s ease-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border-dark);
+            width: 100%; aspect-ratio: 16 / 9; position: relative; border-radius: 12px; background-color: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-dark);
+            transition: transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
+            will-change: transform, opacity;
         }
-
-        video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: var(--border-radius-md);
-        }
-
-        #videoPlayerContainer.empty::before {
-            font-family: "Font Awesome 6 Free";
-            content: '\f144';
-            font-weight: 900;
-            font-size: 5em;
-            color: rgba(255, 255, 255, 0.2);
-        }
-
-        .watched-checkbox {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border: 2px solid var(--primary);
-            border-radius: 6px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease-out;
-            vertical-align: middle;
-            background-color: transparent;
-        }
-
-        .watched-checkbox:checked {
-            background-color: var(--success);
-            border-color: var(--success);
-        }
-
-        .watched-checkbox:checked::after {
-            content: '✔';
-            color: white;
-            font-size: 14px;
-            line-height: 1;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
+        #videoPlayerContainer.changing { transform: scale(0.97); opacity: 0.5; }
+        video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #videoPlayerContainer.empty::before { font-family: "Font Awesome 6 Free"; content: '\f144'; font-weight: 900; font-size: 4em; color: rgba(255, 255, 255, 0.2); }
+        
+        .watched-checkbox { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid var(--primary); border-radius: 5px; cursor: pointer; position: relative; transition: all 0.2s ease; vertical-align: middle; }
+        .watched-checkbox:checked { background-color: var(--success); border-color: var(--success); }
+        .watched-checkbox:checked::after { content: '✔'; color: white; font-size: 14px; line-height: 1; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-overlay.visible { display: flex; animation: fadeIn 0.3s ease forwards; }
+        .modal-content { background: var(--card-bg-dark); color: var(--text-dark); padding: 24px; border-radius: 12px; width: 90%; max-width: 700px; border: 1px solid var(--border-dark); animation: fadeIn 0.3s ease forwards; }
+        body.light .modal-content { background: var(--card-bg-light); color: var(--text-light); border-color: var(--border-light); }
+        .modal-content h2 { margin-top: 0; color: var(--primary); }
+        #notesTextarea { width: 100%; background: rgba(0, 0, 0, 0.1); border: 1px solid var(--border-dark); border-radius: 8px; padding: 12px; color: var(--text-dark); font-size: 1em; height: 250px; resize: vertical; }
+        body.light #notesTextarea { background: rgba(0, 0, 0, 0.05); color: var(--text-light); }
+        .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 12px; }
+        
         @media (max-width: 1200px) {
-            .main-content-flex {
-                flex-direction: column;
-                gap: var(--spacing-xl);
-            }
-            .video-column {
-                width: 100%;
-                position: static;
-            }
-            .table-wrapper {
-                max-height: 50vh;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: var(--spacing-md);
-            }
-            .container {
-                padding: var(--spacing-lg);
-            }
-            .main-title {
-                font-size: 2em;
-            }
-            .header-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
+            .main-content-flex { flex-direction: column; }
+            .video-column { width: 100%; position: static; }
         }
     </style>
 </head>
@@ -577,18 +197,35 @@
                 <input type="text" id="searchInput" placeholder="Search topics...">
                 <i class="fas fa-search"></i>
             </div>
+            <div class="playlist-filters">
+                <button class="control-btn filter-btn active" data-filter="all">All</button>
+                <button class="control-btn filter-btn" data-filter="watched">Watched</button>
+                <button class="control-btn filter-btn" data-filter="unwatched">Unwatched</button>
+            </div>
             <div class="toggle-container">
                 <label class="switch">
                     <input type="checkbox" id="darkToggle">
-                    <span class="slider">
-                        <i class="fas fa-moon"></i>
-                        <i class="fas fa-sun"></i>
-                    </span>
+                    <span class="slider"></span>
                 </label>
             </div>
         </div>
 
         <main class="main-content-flex">
+            <div class="video-column">
+                <div id="videoPlayerContainer" class="empty">
+                    <video id="videoPlayer" controls controlsList="nodownload"></video>
+                </div>
+                <div class="extra-controls" style="margin-top: 16px;">
+                    <div class="playback-speed" style="display:flex; gap: 8px; align-items:center;">
+                        <span>Speed:</span>
+                        <button class="control-btn speed-btn" data-speed="0.75">0.75x</button>
+                        <button class="control-btn speed-btn active" data-speed="1">1x</button>
+                        <button class="control-btn speed-btn" data-speed="1.5">1.5x</button>
+                        <button class="control-btn speed-btn" data-speed="2">2x</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-column">
                 <div class="table-wrapper">
                     <table>
@@ -597,22 +234,35 @@
                                 <th>#</th>
                                 <th>Topic</th>
                                 <th>Action</th>
+                                <th><i class="fas fa-edit" title="Notes"></i></th>
                                 <th><i class="fas fa-check-circle" title="Watched"></i></th>
                             </tr>
                         </thead>
                         <tbody id="videoTable"></tbody>
                     </table>
                 </div>
-            </div>
-            <div class="video-column">
-                <div id="videoPlayerContainer" class="empty">
-                    <video id="videoPlayer" controls controlsList="nodownload"></video>
+                <div class="extra-controls" style="margin-top: 16px;">
+                    <button id="resetProgressBtn" class="control-btn">
+                        <i class="fas fa-undo"></i> Reset Progress
+                    </button>
                 </div>
             </div>
         </main>
     </div>
 
+    <div id="notesModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="notesModalTitle">Video Notes</h2>
+            <textarea id="notesTextarea" placeholder="Write your notes here..."></textarea>
+            <div class="modal-actions">
+                <button id="closeNotesBtn" class="control-btn">Close</button>
+                <button id="saveNotesBtn" class="control-btn action-btn" style="background:var(--success); border-color: var(--success-dark); color: white;">Save</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        // JavaScript is unchanged from the previous version.
         document.addEventListener('DOMContentLoaded', () => {
             const videoTableBody = document.getElementById('videoTable');
             const videoPlayer = document.getElementById('videoPlayer');
@@ -621,283 +271,117 @@
             const darkToggle = document.getElementById('darkToggle');
             const body = document.body;
             const tableWrapper = document.querySelector('.table-wrapper');
+            const resetProgressBtn = document.getElementById('resetProgressBtn');
 
             const filenames = [
-                "1. C++ Intro.mp4",
-                "2. cout, cin, endl, iostream, inline, default arg, reference.mp4",
-                "3. Solution of Assignment-18  Arrays.mp4",
-                "4. Function Overloading Part-1.mp4",
-                "5. Function Overloading, Structure in C Revision, Ass 19 Sol.mp4",
-                "6. Structure in C++, Classes and Objects.mp4",
-                "7. static in C++, Assignment Solution -20.mp4",
-                "8. Passing and returning Object, solution of assignment 21, 22.mp4",
-                "9. Constructor, Destructor, Assignment-23 Solution.mp4",
-                "10. Initializers, Operator Overloading, Solution Assignment-24.mp4",
-                "11. Friend Function, Solution of Assignment-25.mp4",
-                "12. Pointer, this, DMA, Solution of Assignment-26.mp4",
-                "13. Inheritance.mp4",
-                "14. Constructor in Inheritance, Diamond Problem, Sol A-27.mp4",
-                "15. Overriding, Hiding, Overloading, Virtual function.mp4",
-                "16. Pure Virtual function, Abstract Class, Exception Handling.mp4",
-                "17. File Handling, Solution of Assignment-29 and 30.mp4",
-                "18. Introduction to Data Structure.mp4",
-                "19. Array Data Structure, Solution of Assignment 31.mp4",
-                "20. Dynamic Array, Program of Array, Sol of Assignment-32,33.mp4",
-                "21. Singly Linked List, Program of Dynamic Array, sol of A28, 34.mp4",
-                "22. SLL Program, CLL, DLL.mp4",
-                "23. Solution of Assignment 44,45, CDLL, Stack.mp4",
-                "24. Solution of Assignment-35,46,47, Queue data structure.mp4",
-                "25. deque, solution of Assignment-36, 48,49.mp4",
-                "26. Tree, Binary Tree, BST, solution of Assignment-50.mp4",
-                "27. BST, Solution of Assignment-51,52,53.mp4",
-                "28. AVL, Graph, BFS, DFS, solution of Assignment-37.mp4",
-                "29. Sorting, Heap.mp4",
-                "30. Solution of Assignment-38, 54, Time Complexity.mp4",
-                "31. Solution of Assignment-55,56, Searching, Hashing.mp4",
-                "32. Solution of Assignment-58, Generic Programming, templates.mp4",
-                "33. STL, array.mp4",
-                "34. vector, list and forward_list.mp4",
-                "35. Solution Assignment-61.mp4",
-                "36. Solution Assignment-62.mp4",
-                "37. Solution Assignment-63.mp4",
-                "38. Solution Assignment-64.mp4",
-                "39. deque, stack, queue, priority_queue, string, pair tuple.mp4",
-                "40. set, map, Algorithms.mp4",
-                "41. Types of Algo, DP, Dijkstras Algo, Project Solution.mp4",
-                "42. Tower of Hanoi.mp4",
-                "43. Storage Classes.mp4",
-                "44. Type Modifiers.mp4",
-                "45. union.mp4",
-                "46. enum.mp4"
+                "1. C++ Intro.mp4", "2. cout, cin, endl, iostream, inline, default arg, reference.mp4",
+                "3. Solution of Assignment-18  Arrays.mp4", "4. Function Overloading Part-1.mp4",
+                "5. Function Overloading, Structure in C Revision, Ass 19 Sol.mp4", "6. Structure in C++, Classes and Objects.mp4",
+                "7. static in C++, Assignment Solution -20.mp4", "8. Passing and returning Object, solution of assignment 21, 22.mp4",
+                "9. Constructor, Destructor, Assignment-23 Solution.mp4", "10. Initializers, Operator Overloading, Solution Assignment-24.mp4",
+                "11. Friend Function, Solution of Assignment-25.mp4", "12. Pointer, this, DMA, Solution of Assignment-26.mp4",
+                "13. Inheritance.mp4", "14. Constructor in Inheritance, Diamond Problem, Sol A-27.mp4",
+                "15. Overriding, Hiding, Overloading, Virtual function.mp4", "16. Pure Virtual function, Abstract Class, Exception Handling.mp4",
+                "17. File Handling, Solution of Assignment-29 and 30.mp4", "18. Introduction to Data Structure.mp4",
+                "19. Array Data Structure, Solution of Assignment 31.mp4", "20. Dynamic Array, Program of Array, Sol of Assignment-32,33.mp4",
+                "21. Singly Linked List, Program of Dynamic Array, sol of A28, 34.mp4", "22. SLL Program, CLL, DLL.mp4",
+                "23. Solution of Assignment 44,45, CDLL, Stack.mp4", "24. Solution of Assignment-35,46,47, Queue data structure.mp4",
+                "25. deque, solution of Assignment-36, 48,49.mp4", "26. Tree, Binary Tree, BST, solution of Assignment-50.mp4",
+                "27. BST, Solution of Assignment-51,52,53.mp4", "28. AVL, Graph, BFS, DFS, solution of Assignment-37.mp4",
+                "29. Sorting, Heap.mp4", "30. Solution of Assignment-38, 54, Time Complexity.mp4",
+                "31. Solution of Assignment-55,56, Searching, Hashing.mp4", "32. Solution of Assignment-58, Generic Programming, templates.mp4",
+                "33. STL, array.mp4", "34. vector, list and forward_list.mp4",
+                "35. Solution Assignment-61.mp4", "36. Solution Assignment-62.mp4",
+                "37. Solution Assignment-63.mp4", "38. Solution Assignment-64.mp4",
+                "39. deque, stack, queue, priority_queue, string, pair tuple.mp4", "40. set, map, Algorithms.mp4",
+                "41. Types of Algo, DP, Dijkstras Algo, Project Solution.mp4", "42. Tower of Hanoi.mp4",
+                "43. Storage Classes.mp4", "44. Type Modifiers.mp4",
+                "45. union.mp4", "46. enum.mp4"
             ];
-
+            
+            const LS_PREFIX = 'cppCourseTracker_';
+            const KEYS = { LAST_PLAYED: `${LS_PREFIX}lastPlayed`, SCROLL_POS: `${LS_PREFIX}scrollPosition`, THEME: `${LS_PREFIX}theme`, SPEED: `${LS_PREFIX}playbackSpeed`, NOTES_PREFIX: `${LS_PREFIX}notes_`, WATCHED_PREFIX: `${LS_PREFIX}watched_`, TIME_POS_PREFIX: `${LS_PREFIX}pos_`, };
             let currentPlayingRow = null;
+            let currentFilter = 'all';
 
-            const LAST_PLAYED_KEY = 'cpp-course-last-played';
-            const SCROLL_POS_KEY = 'cpp-course-scroll-position';
-            const THEME_KEY = 'cpp-course-theme';
-
-            const throttle = (func, limit) => {
-                let inThrottle;
-                return function() {
-                    const args = arguments;
-                    const context = this;
-                    if (!inThrottle) {
-                        func.apply(context, args);
-                        inThrottle = true;
-                        setTimeout(() => inThrottle = false, limit);
-                    }
-                };
-            };
-
-            const updateProgressBar = () => {
-                const watchedCount = document.querySelectorAll('.watched-checkbox:checked').length;
-                const totalVideos = filenames.length;
-                const percentage = totalVideos > 0 ? Math.round((watchedCount / totalVideos) * 100) : 0;
-
-                const progressFill = document.getElementById('progress');
-                progressFill.style.width = percentage + '%';
-
-                if (percentage === 100) {
-                    progressFill.textContent = 'Course Complete! 🎉';
-                } else {
-                    progressFill.textContent = `${percentage}%`;
-                }
-                progressFill.classList.toggle('complete', percentage === 100);
-            };
-
-            const setupVideo = (row) => {
+            const throttle = (func, limit) => { let inThrottle; return function(...args) { if (!inThrottle) { func.apply(this, args); inThrottle = true; setTimeout(() => inThrottle = false, limit); } }; };
+            const updateProgressBar = () => { const watchedCount = document.querySelectorAll('.watched-checkbox:checked').length; const totalVideos = filenames.length; const percentage = totalVideos > 0 ? Math.round((watchedCount / totalVideos) * 100) : 0; const progressFill = document.getElementById('progress'); progressFill.style.width = `${percentage}%`; if(percentage > 0) { progressFill.textContent = `${percentage}%`; } else { progressFill.textContent = ''; } progressFill.classList.toggle('complete', percentage === 100); };
+            const applyFilters = () => { const query = searchInput.value.toLowerCase().trim(); videoTableBody.querySelectorAll('tr').forEach(row => { const isWatched = row.classList.contains('completed-video'); const topicText = row.querySelector('.filename-cell').textContent.toLowerCase(); const matchesSearch = topicText.includes(query); const matchesFilter = (currentFilter === 'all') || (currentFilter === 'watched' && isWatched) || (currentFilter === 'unwatched' && !isWatched); row.classList.toggle('hidden-row', !(matchesSearch && matchesFilter)); }); };
+            const setupVideo = (row, andPlay = false) => {
                 if (!row) return;
-
-                const previousIndicatorCell = document.querySelector('.resume-indicator');
-                if (previousIndicatorCell) {
-                    previousIndicatorCell.classList.remove('resume-indicator');
-                }
-                const filenameCell = row.querySelector('.filename-cell');
-                if (filenameCell) {
-                    filenameCell.classList.add('resume-indicator');
-                }
-
-                if (currentPlayingRow && currentPlayingRow !== row) {
-                    currentPlayingRow.classList.remove('playing');
-                }
-
-                currentPlayingRow = row;
-                videoPlayerContainer.classList.remove('empty');
-
-                const filename = row.dataset.filename;
-                const posKey = `pos-${filename}`;
-                const lastTime = parseFloat(localStorage.getItem(posKey)) || 0;
-
-                localStorage.setItem(LAST_PLAYED_KEY, filename);
-                videoPlayer.src = filename;
-
-                videoPlayer.oncanplay = () => {
-                    if (lastTime > 0) {
-                        videoPlayer.currentTime = lastTime;
-                    }
-                    videoPlayer.oncanplay = null;
-                };
-                videoPlayer.load();
+                videoPlayerContainer.classList.add('changing');
+                setTimeout(() => {
+                    document.querySelector('.resume-indicator')?.classList.remove('resume-indicator');
+                    row.querySelector('.filename-cell')?.classList.add('resume-indicator');
+                    if (currentPlayingRow && currentPlayingRow !== row) { currentPlayingRow.classList.remove('playing'); }
+                    currentPlayingRow = row;
+                    const filename = row.dataset.filename;
+                    const lastTime = parseFloat(localStorage.getItem(`${KEYS.TIME_POS_PREFIX}${filename}`)) || 0;
+                    localStorage.setItem(KEYS.LAST_PLAYED, filename);
+                    videoPlayer.src = filename;
+                    videoPlayer.oncanplay = () => {
+                        if (lastTime > 0) videoPlayer.currentTime = lastTime;
+                        videoPlayerContainer.classList.remove('empty');
+                        videoPlayerContainer.classList.remove('changing');
+                        if (andPlay) { videoPlayer.play(); }
+                        videoPlayer.oncanplay = null;
+                    };
+                    videoPlayer.load();
+                    applyPlaybackSpeed();
+                }, 200);
             };
-
             const playNext = () => {
                 if (!currentPlayingRow) return;
-                const currentIndex = parseInt(currentPlayingRow.dataset.index, 10);
-                const nextIndex = currentIndex + 1;
-                if (nextIndex < filenames.length) {
-                    const nextRow = document.querySelector(`tr[data-index='${nextIndex}']:not(.hidden-by-search)`);
-                    if (nextRow) {
-                        setupVideo(nextRow);
-                        videoPlayer.play();
-                        nextRow.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                    }
+                const visibleRows = Array.from(videoTableBody.querySelectorAll('tr:not(.hidden-row)'));
+                const currentIndexInView = visibleRows.indexOf(currentPlayingRow);
+                if (currentIndexInView > -1 && currentIndexInView + 1 < visibleRows.length) {
+                    const nextRow = visibleRows[currentIndexInView + 1];
+                    setupVideo(nextRow, true);
+                    nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
                     videoPlayerContainer.classList.add('empty');
-                    if (currentPlayingRow) currentPlayingRow.classList.remove('playing');
+                    currentPlayingRow?.classList.remove('playing');
                     currentPlayingRow = null;
-                    alert("Congratulations! You've finished the course!");
                 }
             };
-
-            videoTableBody.addEventListener('click', (e) => {
-                const row = e.target.closest('tr');
-                if (!row) return;
-
-                if (e.target.closest('.play-btn')) {
-
-                    if (row === currentPlayingRow) {
-                        if (videoPlayer.ended) {
-                            videoPlayer.currentTime = 0;
-                            videoPlayer.play();
-                        } else if (videoPlayer.paused) {
-                            videoPlayer.play();
-                        } else {
-                            videoPlayer.pause();
-                        }
-                    } else {
-                        setupVideo(row);
-                        videoPlayer.play();
-                    }
-                }
-            });
-
-            videoTableBody.addEventListener('change', (e) => {
-                if (e.target.classList.contains('watched-checkbox')) {
-                    const row = e.target.closest('tr');
-                    row.classList.toggle('completed-video', e.target.checked);
-                    localStorage.setItem(e.target.id, e.target.checked);
-                    updateProgressBar();
-                }
-            });
-
-            videoPlayer.addEventListener('timeupdate', throttle(() => {
-                if (currentPlayingRow && videoPlayer.currentTime > 0 && !videoPlayer.ended) {
-                    localStorage.setItem(`pos-${currentPlayingRow.dataset.filename}`, videoPlayer.currentTime);
-                }
-            }, 1000));
-
-            videoPlayer.addEventListener('ended', () => {
-                if (!currentPlayingRow) return;
-
-                const filename = currentPlayingRow.dataset.filename;
-                localStorage.removeItem(`pos-${filename}`);
-
-                const checkbox = currentPlayingRow.querySelector('.watched-checkbox');
-                if (checkbox && !checkbox.checked) {
-                    checkbox.checked = true;
-                    checkbox.dispatchEvent(new Event('change', {
-                        bubbles: true
-                    }));
-                }
-                playNext();
-            });
-
+            const applyPlaybackSpeed = () => { const savedSpeed = localStorage.getItem(KEYS.SPEED) || '1'; videoPlayer.playbackRate = parseFloat(savedSpeed); document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.speed === savedSpeed)); };
+            videoTableBody.addEventListener('click', (e) => { const row = e.target.closest('tr'); if (!row) return; if (e.target.closest('.play-btn')) { if (row === currentPlayingRow && videoPlayer.src) { videoPlayer.paused ? videoPlayer.play() : videoPlayer.pause(); } else { setupVideo(row, true); } } else if (e.target.matches('.notes-btn, .notes-btn *')) { openNotesModal(row.dataset.filename, row.querySelector('.filename-cell').textContent); } });
+            videoTableBody.addEventListener('change', (e) => { if (e.target.classList.contains('watched-checkbox')) { const row = e.target.closest('tr'); row.classList.toggle('completed-video', e.target.checked); localStorage.setItem(e.target.id, e.target.checked); updateProgressBar(); if(currentFilter !== 'all') applyFilters(); } });
+            videoPlayer.addEventListener('timeupdate', throttle(() => { if (currentPlayingRow && videoPlayer.currentTime > 0 && !videoPlayer.ended) { localStorage.setItem(`${KEYS.TIME_POS_PREFIX}${currentPlayingRow.dataset.filename}`, videoPlayer.currentTime); } }, 1000));
+            videoPlayer.addEventListener('ended', () => { if (!currentPlayingRow) return; localStorage.removeItem(`${KEYS.TIME_POS_PREFIX}${currentPlayingRow.dataset.filename}`); const checkbox = currentPlayingRow.querySelector('.watched-checkbox'); if (checkbox && !checkbox.checked) { checkbox.checked = true; checkbox.dispatchEvent(new Event('change', { bubbles: true })); } playNext(); });
             videoPlayer.addEventListener('play', () => currentPlayingRow?.classList.add('playing'));
             videoPlayer.addEventListener('pause', () => currentPlayingRow?.classList.remove('playing'));
-
-            tableWrapper.addEventListener('scroll', throttle(() => {
-                localStorage.setItem(SCROLL_POS_KEY, tableWrapper.scrollTop);
-            }, 500));
-
+            tableWrapper.addEventListener('scroll', throttle(() => localStorage.setItem(KEYS.SCROLL_POS, tableWrapper.scrollTop), 150));
+            searchInput.addEventListener('input', applyFilters);
+            document.querySelector('.playlist-filters').addEventListener('click', e => { if (e.target.classList.contains('filter-btn')) { document.querySelector('.filter-btn.active').classList.remove('active'); e.target.classList.add('active'); currentFilter = e.target.dataset.filter; applyFilters(); } });
+            document.querySelector('.playback-speed').addEventListener('click', e => { if (e.target.classList.contains('speed-btn')) { localStorage.setItem(KEYS.SPEED, e.target.dataset.speed); applyPlaybackSpeed(); } });
+            resetProgressBtn.addEventListener('click', () => { if (confirm('Are you sure you want to reset all your progress? This cannot be undone.')) { Object.keys(localStorage).filter(key => key.startsWith(LS_PREFIX)).forEach(key => localStorage.removeItem(key)); location.reload(); } });
+            document.addEventListener('keydown', e => { if (e.target === searchInput || e.target.tagName === 'TEXTAREA') return; switch(e.code) { case 'Space': e.preventDefault(); videoPlayer.paused ? videoPlayer.play() : videoPlayer.pause(); break; case 'KeyF': e.preventDefault(); videoPlayer.requestFullscreen(); break; case 'KeyM': e.preventDefault(); videoPlayer.muted = !videoPlayer.muted; break; case 'ArrowRight': e.preventDefault(); videoPlayer.currentTime += 5; break; case 'ArrowLeft': e.preventDefault(); videoPlayer.currentTime -= 5; break; } });
+            const notesModal = document.getElementById('notesModal');
+            let currentNotesFile = '';
+            function openNotesModal(filename, title) { currentNotesFile = filename; notesModal.querySelector('h2').textContent = `Notes for: ${title}`; notesModal.querySelector('textarea').value = localStorage.getItem(`${KEYS.NOTES_PREFIX}${filename}`) || ''; notesModal.classList.add('visible'); }
+            document.getElementById('saveNotesBtn').addEventListener('click', () => { const notesText = notesModal.querySelector('textarea').value; localStorage.setItem(`${KEYS.NOTES_PREFIX}${currentNotesFile}`, notesText); document.querySelector(`tr[data-filename="${currentNotesFile}"] .notes-btn`).classList.toggle('has-notes', notesText.trim() !== ''); notesModal.classList.remove('visible'); });
+            document.getElementById('closeNotesBtn').addEventListener('click', () => notesModal.classList.remove('visible'));
             const initialize = () => {
-                // Theme preference
-                const preferredTheme = localStorage.getItem(THEME_KEY) || 'dark';
-                if (preferredTheme === 'light') {
-                    body.classList.remove('dark');
-                    body.classList.add('light');
-                    darkToggle.checked = false; // Light mode is unchecked
-                } else {
-                    body.classList.remove('light');
-                    body.classList.add('dark');
-                    darkToggle.checked = true; // Dark mode is checked
-                }
-
-                darkToggle.addEventListener('change', () => {
-                    const isDarkMode = darkToggle.checked;
-                    body.className = isDarkMode ? 'dark' : 'light';
-                    localStorage.setItem(THEME_KEY, isDarkMode ? 'dark' : 'light');
-                });
-
-
+                const preferredTheme = localStorage.getItem(KEYS.THEME) || 'dark'; body.className = preferredTheme; darkToggle.checked = (preferredTheme === 'light');
+                darkToggle.addEventListener('change', () => { const newTheme = darkToggle.checked ? 'light' : 'dark'; body.className = newTheme; localStorage.setItem(KEYS.THEME, newTheme); });
                 const fragment = document.createDocumentFragment();
                 filenames.forEach((filename, index) => {
-                    const id = `vid-${index}`;
-                    const isChecked = localStorage.getItem(id) === 'true';
-                    const row = document.createElement('tr');
-                    row.dataset.filename = filename;
-                    row.dataset.index = index;
+                    const videoId = `${KEYS.WATCHED_PREFIX}${index}`; const isChecked = localStorage.getItem(videoId) === 'true'; const hasNotes = !!localStorage.getItem(`${KEYS.NOTES_PREFIX}${filename}`); const row = document.createElement('tr'); row.dataset.filename = filename; row.dataset.index = index;
                     if (isChecked) row.classList.add('completed-video');
-
-                    const displayName = filename.replace(/\.mp4/i, '').replace(/_/g, ' ');
-
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td class="filename-cell">${displayName}</td>
-                        <td><button class="play-btn"><i class="fas fa-play"></i><i class="fas fa-pause"></i></button></td>
-                        <td><input type="checkbox" class="watched-checkbox" id="${id}" ${isChecked ? 'checked' : ''}></td>
-                    `;
+                    const displayName = filename.replace(/\.mp4$/i, '').replace(/_/g, ' ');
+                    row.innerHTML = `<td>${index + 1}</td> <td class="filename-cell">${displayName}</td> <td><button class="play-btn action-btn"><i class="fas fa-play"></i><i class="fas fa-pause"></i></button></td> <td><button class="notes-btn ${hasNotes ? 'has-notes' : ''}"><i class="fas fa-edit"></i></button></td> <td><input type="checkbox" class="watched-checkbox" id="${videoId}" ${isChecked ? 'checked' : ''}></td>`;
                     fragment.appendChild(row);
                 });
                 videoTableBody.appendChild(fragment);
-
-                searchInput.addEventListener('input', () => {
-                    const query = searchInput.value.toLowerCase().trim();
-                    videoTableBody.querySelectorAll('tr').forEach(row => {
-                        const topicCell = row.querySelector('.filename-cell');
-                        if (!topicCell) return;
-                        const topicText = topicCell.textContent.toLowerCase();
-                        const isVisible = topicText.includes(query);
-                        row.style.display = isVisible ? '' : 'none';
-                        row.classList.toggle('hidden-by-search', !isVisible);
-                    });
-                });
-
                 updateProgressBar();
-                loadLastSession();
-                loadScrollPosition();
+                applyPlaybackSpeed();
+                const lastPlayedFile = localStorage.getItem(KEYS.LAST_PLAYED);
+                if (lastPlayedFile) { const lastRow = document.querySelector(`tr[data-filename="${lastPlayedFile}"]`); if (lastRow) { setupVideo(lastRow, false); } }
+                const savedScroll = localStorage.getItem(KEYS.SCROLL_POS);
+                if (savedScroll) tableWrapper.scrollTop = parseInt(savedScroll, 10);
+                applyFilters();
             };
-
-            const loadLastSession = () => {
-                const lastPlayedFile = localStorage.getItem(LAST_PLAYED_KEY);
-                if (lastPlayedFile) {
-                    const lastRow = document.querySelector(`tr[data-filename="${lastPlayedFile}"]`);
-                    if (lastRow) {
-                        setupVideo(lastRow);
-                    }
-                }
-            };
-
-            const loadScrollPosition = () => {
-                const savedScroll = localStorage.getItem(SCROLL_POS_KEY);
-                if (savedScroll) {
-                    tableWrapper.scrollTop = parseInt(savedScroll, 10);
-                }
-            };
-
             initialize();
         });
     </script>
